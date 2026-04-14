@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rafi Life Manager ✨</title>
+    
+    <!-- Google Fonts: Poppins for modern look -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS for rapid styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <!-- Tailwind Config for Custom Colors/Fonts -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif'],
+                    },
+                    colors: {
+                        softPink: '#FFE5EC',
+                        softBlue: '#E5F0FF',
+                        softPurple: '#F0E5FF',
+                        softGreen: '#E5FFE9',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Glassmorphism utility classes */
+        .glass {
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+        }
+        
+        .glass-darker {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        
+        /* Smooth interactions */
+        .transition-all {
+            transition-property: all;
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+            transition-duration: 300ms;
+        }
+
+        /* Checkbox styling */
+        input[type="checkbox"]:checked + div {
+            text-decoration: line-through;
+            color: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-softBlue via-softPurple to-softPink min-h-screen text-slate-800 antialiased selection:bg-purple-200 selection:text-purple-900 pb-20">
+
+    <div class="max-w-md mx-auto p-5 pt-8">
+        
+        <!-- Header Section -->
+        <header class="mb-8 animate-fade-in-down">
+            <div class="flex justify-between items-center mb-2">
+                <div>
+                    <p class="text-sm text-slate-500 font-medium" id="current-date">Memuat tanggal...</p>
+                    <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Halo, <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-pink-500">Rafi yang Keren!</span> ✨</h1>
+                </div>
+                <div class="h-12 w-12 rounded-full glass flex items-center justify-center text-2xl shadow-sm">
+                    😎
+                </div>
+            </div>
+            <p class="text-sm text-slate-600">Siap produktif dan tetap hemat hari ini?</p>
+        </header>
+
+        <!-- Main Content -->
+        <main class="space-y-6">
+
+            <!-- Budget Widget -->
+            <section class="glass rounded-3xl p-5 relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-purple-200 rounded-full mix-blend-multiply filter blur-2xl opacity-50 -mr-10 -mt-10"></div>
+                <div class="absolute bottom-0 left-0 w-32 h-32 bg-pink-200 rounded-full mix-blend-multiply filter blur-2xl opacity-50 -ml-10 -mb-10"></div>
+                
+                <div class="relative z-10">
+                    <div class="flex justify-between items-center mb-1">
+                        <h2 class="text-sm font-semibold text-slate-500 uppercase tracking-wider">Sisa Budget Bulan Ini</h2>
+                        <button onclick="setBudget()" class="text-xs bg-white/50 px-2 py-1 rounded-lg hover:bg-white transition-colors">Set Target</button>
+                    </div>
+                    <p class="text-3xl font-bold text-slate-800 mb-4" id="display-remaining">Rp 0</p>
+                    
+                    <div class="w-full bg-white/50 rounded-full h-3 mb-2 overflow-hidden border border-white">
+                        <div id="budget-bar" class="bg-gradient-to-r from-green-400 to-emerald-500 h-3 rounded-full transition-all duration-500" style="width: 100%"></div>
+                    </div>
+                    <div class="flex justify-between text-xs text-slate-500 font-medium">
+                        <span id="display-spent">Terpakai: Rp 0</span>
+                        <span id="budget-status">Aman! 🚀</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Toggle Tabs (Jadwal vs Keuangan) -->
+            <div class="flex p-1 glass-darker rounded-2xl">
+                <button onclick="switchTab('schedule')" id="tab-schedule" class="flex-1 py-2 text-sm font-semibold rounded-xl bg-white shadow-sm text-purple-600 transition-all">Jadwal Harian</button>
+                <button onclick="switchTab('finance')" id="tab-finance" class="flex-1 py-2 text-sm font-semibold rounded-xl text-slate-500 hover:text-slate-800 transition-all">Catatan Bokek</button>
+            </div>
+
+            <!-- TAB 1: SCHEDULE -->
+            <section id="section-schedule" class="space-y-4 block">
+                <!-- Add Task Form -->
+                <form id="form-task" class="flex gap-2">
+                    <input type="text" id="input-task" placeholder="Mau ngapain hari ini bro?" class="flex-1 glass-darker rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300 placeholder-slate-400" required>
+                    <input type="time" id="input-time" class="glass-darker rounded-xl px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300 text-slate-600" required>
+                    <button type="submit" class="bg-slate-800 text-white p-3 rounded-xl hover:bg-slate-700 transition-all shadow-md">
+                        <i class="ph ph-plus font-bold text-lg"></i>
+                    </button>
+                </form>
+
+                <!-- Task List -->
+                <div id="task-list" class="space-y-3">
+                    <!-- Tasks will be injected here -->
+                </div>
+                
+                <div id="empty-task" class="hidden flex-col items-center justify-center py-8 text-slate-400">
+                    <i class="ph ph-coffee text-4xl mb-2"></i>
+                    <p class="text-sm">Kosong nih. Rebahan time? 🛌</p>
+                </div>
+            </section>
+
+            <!-- TAB 2: FINANCE -->
+            <section id="section-finance" class="space-y-4 hidden">
+                <!-- Add Expense Form -->
+                <form id="form-expense" class="glass-darker rounded-2xl p-4 space-y-3">
+                    <input type="text" id="input-expense-name" placeholder="Beli apa tadi?" class="w-full bg-white/60 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300" required>
+                    
+                    <div class="flex gap-2">
+                        <div class="relative flex-1">
+                            <span class="absolute left-3 top-2.5 text-sm text-slate-500 font-medium">Rp</span>
+                            <input type="number" id="input-expense-amount" placeholder="0" class="w-full bg-white/60 rounded-xl pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300" required>
+                        </div>
+                        
+                        <select id="input-expense-category" class="flex-1 bg-white/60 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300 text-slate-600 appearance-none">
+                            <option value="Makanan">🍔 Makanan</option>
+                            <option value="Transport">🛵 Transport</option>
+                            <option value="Healing">🏖️ Healing/Nongki</option>
+                            <option value="Racun">📦 Racun Impulsif</option>
+                            <option value="Penting">⚠️ Kebutuhan Penting</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold py-2.5 rounded-xl hover:opacity-90 transition-all shadow-md">
+                        Catat Pengeluaran 💸
+                    </button>
+                </form>
+
+                <!-- Expense List -->
+                <div class="flex justify-between items-center px-1">
+                    <h3 class="text-sm font-semibold text-slate-600">Histori Pengeluaran</h3>
+                </div>
+                
+                <div id="expense-list" class="space-y-3">
+                    <!-- Expenses will be injected here -->
+                </div>
+
+                <div id="empty-expense" class="hidden flex-col items-center justify-center py-6 text-slate-400">
+                    <i class="ph ph-piggy-bank text-4xl mb-2"></i>
+                    <p class="text-sm">Bagus! Belum ada pengeluaran. Nabung terus! 📈</p>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Scripts for Logic -->
+    <script>
+        // State Management
+        let tasks = [
+            { id: 1, name: "Nugas Kuliah/Sekolah", time: "10:00", done: false },
+            { id: 2, name: "Workout Tipis-tipis", time: "16:30", done: false }
+        ];
+        
+        let expenses = [];
+        let totalBudget = 2000000; // Default budget 2 Juta
+        
+        // DOM Elements
+        const dateEl = document.getElementById('current-date');
+        const taskListEl = document.getElementById('task-list');
+        const emptyTaskEl = document.getElementById('empty-task');
+        const expenseListEl = document.getElementById('expense-list');
+        const emptyExpenseEl = document.getElementById('empty-expense');
+        
+        const formTask = document.getElementById('form-task');
+        const formExpense = document.getElementById('form-expense');
+        
+        // Initialize
+        function init() {
+            setGreetingDate();
+            renderTasks();
+            renderExpenses();
+            updateBudgetWidget();
+        }
+
+        // --- UI Interactions ---
+        function switchTab(tab) {
+            const secSched = document.getElementById('section-schedule');
+            const secFin = document.getElementById('section-finance');
+            const btnSched = document.getElementById('tab-schedule');
+            const btnFin = document.getElementById('tab-finance');
+
+            if (tab === 'schedule') {
+                secSched.classList.remove('hidden');
+                secFin.classList.add('hidden');
+                
+                btnSched.className = "flex-1 py-2 text-sm font-semibold rounded-xl bg-white shadow-sm text-purple-600 transition-all";
+                btnFin.className = "flex-1 py-2 text-sm font-semibold rounded-xl text-slate-500 hover:text-slate-800 transition-all bg-transparent shadow-none";
+            } else {
+                secSched.classList.add('hidden');
+                secFin.classList.remove('hidden');
+                
+                btnFin.className = "flex-1 py-2 text-sm font-semibold rounded-xl bg-white shadow-sm text-pink-600 transition-all";
+                btnSched.className = "flex-1 py-2 text-sm font-semibold rounded-xl text-slate-500 hover:text-slate-800 transition-all bg-transparent shadow-none";
+            }
+        }
+
+        function setGreetingDate() {
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const today = new Date().toLocaleDateString('id-ID', options);
+            dateEl.textContent = today;
+        }
+
+        function formatRupiah(number) {
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(number);
+        }
+
+        // --- Schedule Logic ---
+        formTask.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const nameInput = document.getElementById('input-task').value;
+            const timeInput = document.getElementById('input-time').value;
+            
+            const newTask = {
+                id: Date.now(),
+                name: nameInput,
+                time: timeInput,
+                done: false
+            };
+            
+            tasks.push(newTask);
+            
+            // Sort by time
+            tasks.sort((a, b) => a.time.localeCompare(b.time));
+            
+            renderTasks();
+            formTask.reset();
+        });
+
+        function toggleTask(id) {
+            const task = tasks.find(t => t.id === id);
+            if(task) {
+                task.done = !task.done;
+                renderTasks();
+            }
+        }
+
+        function deleteTask(id) {
+            tasks = tasks.filter(t => t.id !== id);
+            renderTasks();
+        }
+
+        function renderTasks() {
+            taskListEl.innerHTML = '';
+            
+            if (tasks.length === 0) {
+                emptyTaskEl.classList.remove('hidden');
+                emptyTaskEl.classList.add('flex');
+            } else {
+                emptyTaskEl.classList.add('hidden');
+                emptyTaskEl.classList.remove('flex');
+                
+                tasks.forEach(task => {
+                    const div = document.createElement('div');
+                    div.className = `glass rounded-xl p-3 flex items-center justify-between transition-all ${task.done ? 'opacity-60 bg-slate-50/50' : 'hover:-translate-y-1'}`;
+                    
+                    div.innerHTML = `
+                        <label class="flex items-center gap-3 cursor-pointer flex-1">
+                            <input type="checkbox" class="peer w-5 h-5 rounded border-slate-300 text-purple-600 focus:ring-purple-500 accent-purple-500 transition-all" ${task.done ? 'checked' : ''} onchange="toggleTask(${task.id})">
+                            <div class="flex flex-col transition-all">
+                                <span class="text-sm font-semibold text-slate-800 ${task.done ? 'line-through text-slate-400' : ''}">${task.name}</span>
+                                <span class="text-xs text-purple-600 font-medium flex items-center gap-1"><i class="ph ph-clock"></i> ${task.time}</span>
+                            </div>
+                        </label>
+                        <button onclick="deleteTask(${task.id})" class="text-slate-400 hover:text-red-500 p-2 transition-colors">
+                            <i class="ph ph-trash"></i>
+                        </button>
+                    `;
+                    taskListEl.appendChild(div);
+                });
+            }
+        }
+
+        // --- Finance Logic ---
+        formExpense.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const nameInput = document.getElementById('input-expense-name').value;
+            const amountInput = parseInt(document.getElementById('input-expense-amount').value);
+            const categoryInput = document.getElementById('input-expense-category').value;
+            
+            const newExpense = {
+                id: Date.now(),
+                name: nameInput,
+                amount: amountInput,
+                category: categoryInput,
+                date: new Date().toLocaleDateString('id-ID', { month: 'short', day: 'numeric'})
+            };
+            
+            expenses.unshift(newExpense); // Add to top
+            renderExpenses();
+            updateBudgetWidget();
+            formExpense.reset();
+        });
+
+        function deleteExpense(id) {
+            expenses = expenses.filter(e => e.id !== id);
+            renderExpenses();
+            updateBudgetWidget();
+        }
+
+        function setBudget() {
+            const input = prompt("Masukkan target budget bulanan (angka saja, misal 2000000):", totalBudget);
+            if (input !== null && !isNaN(input) && input > 0) {
+                totalBudget = parseInt(input);
+                updateBudgetWidget();
+            }
+        }
+
+        function renderExpenses() {
+            expenseListEl.innerHTML = '';
+            
+            if (expenses.length === 0) {
+                emptyExpenseEl.classList.remove('hidden');
+                emptyExpenseEl.classList.add('flex');
+            } else {
+                emptyExpenseEl.classList.add('hidden');
+                emptyExpenseEl.classList.remove('flex');
+                
+                expenses.forEach(exp => {
+                    // Tentukan warna icon berdasarkan kategori
+                    let iconBg = 'bg-slate-100';
+                    let iconColor = 'text-slate-500';
+                    let iconName = 'ph-receipt';
+                    
+                    if(exp.category.includes('Makanan')) { iconBg = 'bg-orange-100'; iconColor = 'text-orange-500'; iconName = 'ph-hamburger'; }
+                    if(exp.category.includes('Transport')) { iconBg = 'bg-blue-100'; iconColor = 'text-blue-500'; iconName = 'ph-car'; }
+                    if(exp.category.includes('Healing')) { iconBg = 'bg-pink-100'; iconColor = 'text-pink-500'; iconName = 'ph-martini'; }
+                    if(exp.category.includes('Racun')) { iconBg = 'bg-red-100'; iconColor = 'text-red-500'; iconName = 'ph-shopping-cart'; }
+                    if(exp.category.includes('Penting')) { iconBg = 'bg-purple-100'; iconColor = 'text-purple-500'; iconName = 'ph-warning-circle'; }
+
+                    const div = document.createElement('div');
+                    div.className = `glass rounded-xl p-3 flex items-center gap-3 hover:-translate-y-1 transition-transform`;
+                    
+                    div.innerHTML = `
+                        <div class="w-10 h-10 rounded-full ${iconBg} ${iconColor} flex items-center justify-center text-xl shrink-0">
+                            <i class="ph ${iconName}"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-semibold text-slate-800 truncate">${exp.name}</p>
+                            <p class="text-xs text-slate-500">${exp.category} • ${exp.date}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm font-bold text-red-500">- ${formatRupiah(exp.amount)}</p>
+                            <button onclick="deleteExpense(${exp.id})" class="text-xs text-slate-400 hover:text-red-500 transition-colors">Hapus</button>
+                        </div>
+                    `;
+                    expenseListEl.appendChild(div);
+                });
+            }
+        }
+
+        function updateBudgetWidget() {
+            const totalSpent = expenses.reduce((sum, exp) => sum + exp.amount, 0);
+            const remaining = totalBudget - totalSpent;
+            const percentageUsed = (totalSpent / totalBudget) * 100;
+            
+            document.getElementById('display-remaining').textContent = formatRupiah(remaining);
+            document.getElementById('display-spent').textContent = `Terpakai: ${formatRupiah(totalSpent)}`;
+            
+            const bar = document.getElementById('budget-bar');
+            let barWidth = 100 - percentageUsed;
+            if (barWidth < 0) barWidth = 0;
+            bar.style.width = `${barWidth}%`;
+            
+            // Ubah warna bar berdasarkan status
+            const statusEl = document.getElementById('budget-status');
+            if (percentageUsed >= 90) {
+                bar.className = "bg-gradient-to-r from-red-500 to-rose-600 h-3 rounded-full transition-all duration-500";
+                statusEl.innerHTML = "Waspada Bokek! 🚨";
+                statusEl.classList.add("text-red-500", "font-bold");
+                statusEl.classList.remove("text-slate-500");
+            } else if (percentageUsed >= 70) {
+                bar.className = "bg-gradient-to-r from-yellow-400 to-orange-500 h-3 rounded-full transition-all duration-500";
+                statusEl.innerHTML = "Ngerem dikit bos! ⚠️";
+                statusEl.classList.add("text-orange-500", "font-bold");
+                statusEl.classList.remove("text-slate-500");
+            } else {
+                bar.className = "bg-gradient-to-r from-green-400 to-emerald-500 h-3 rounded-full transition-all duration-500";
+                statusEl.innerHTML = "Masih Aman! 🚀";
+                statusEl.classList.remove("text-red-500", "text-orange-500", "font-bold");
+                statusEl.classList.add("text-slate-500");
+            }
+        }
+
+        // Run App
+        init();
+
+    </script>
+</body>
+</html>
